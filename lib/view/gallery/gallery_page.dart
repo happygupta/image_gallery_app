@@ -1,3 +1,5 @@
+// This file contains the GalleryPage widget, which is the main screen of the image gallery app.
+
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:image_gallery_app/api/pixabay_service.dart';
@@ -6,6 +8,7 @@ import 'package:image_gallery_app/utils/constants/constants.dart';
 import 'package:image_gallery_app/utils/widgets/common_widgets.dart';
 import 'package:image_gallery_app/view/gallery/full_screen_image.dart';
 
+// GalleryPage is a StatefulWidget that displays a grid of images fetched from the Pixabay API.
 class GalleryPage extends StatefulWidget {
   const GalleryPage({super.key});
 
@@ -13,6 +16,7 @@ class GalleryPage extends StatefulWidget {
   State<GalleryPage> createState() => _GalleryPageState();
 }
 
+// _GalleryPageState manages the state of the GalleryPage.
 class _GalleryPageState extends State<GalleryPage> {
   final PixabayService pixabayService = PixabayService();
   List<ImageItem> images = [];
@@ -26,6 +30,7 @@ class _GalleryPageState extends State<GalleryPage> {
   void initState() {
     super.initState();
     _fetchImages();
+    // Set up scroll listener for infinite scrolling
     _scrollController.addListener(() {
       if (_scrollController.position.pixels ==
               _scrollController.position.maxScrollExtent &&
@@ -35,6 +40,7 @@ class _GalleryPageState extends State<GalleryPage> {
     });
   }
 
+  // Fetches images from the Pixabay API
   void _fetchImages() async {
     setState(() {
       isLoading = true;
@@ -49,9 +55,9 @@ class _GalleryPageState extends State<GalleryPage> {
   }
 
   @override
-  void dispose() async {
-    // TODO: implement dispose
-    await DefaultCacheManager().removeFile(cacheKey);
+  void dispose() {
+    // Clean up resources when the widget is disposed
+    DefaultCacheManager().removeFile(cacheKey);
     super.dispose();
   }
 
@@ -59,6 +65,7 @@ class _GalleryPageState extends State<GalleryPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        // Search bar in the app bar
         title: TextField(
           onChanged: (value) {
             setState(() {
@@ -73,6 +80,7 @@ class _GalleryPageState extends State<GalleryPage> {
           ),
         ),
       ),
+      // Grid view of images
       body: GridView.builder(
         controller: _scrollController,
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -90,12 +98,14 @@ class _GalleryPageState extends State<GalleryPage> {
                 alignment: AlignmentDirectional.center,
                 fit: StackFit.expand,
                 children: [
+                  // Displays the image with caching
                   Hero(
                       tag: imageData.id,
                       child: CacheNetworkImageWithManager(
                         imageKey: imageData.id.toString(),
                         imageUrl: imageData.previewUrl,
                       )),
+                  // Overlay with likes and views information
                   Positioned(
                     bottom: 0,
                     child: Container(
@@ -123,7 +133,6 @@ class _GalleryPageState extends State<GalleryPage> {
                           Text(' ${imageData.views}'),
                         ],
                       ),
-                      //     'Likes: ${imageData.likes}, Views: ${imageData.views}'),
                     ),
                   ),
                 ],
@@ -135,6 +144,7 @@ class _GalleryPageState extends State<GalleryPage> {
     );
   }
 
+  // Opens the full screen view of the selected image
   void _openImageDetail(ImageItem imageItem) {
     Navigator.push(
         context,

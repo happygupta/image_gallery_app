@@ -1,10 +1,16 @@
+// This file defines the ImageItem model class, which represents an image from the Pixabay API.
+
 import 'dart:convert';
 
+// Function to convert a JSON string to an ImageItem object
 ImageItem imageItemFromJson(String str) => ImageItem.fromJson(json.decode(str));
 
+// Function to convert an ImageItem object to a JSON string
 String imageItemToJson(ImageItem data) => json.encode(data.toJson());
 
+// ImageItem class definition
 class ImageItem {
+  // Properties representing various attributes of an image
   int id;
   String pageUrl;
   String type;
@@ -28,6 +34,7 @@ class ImageItem {
   String user;
   String userImageUrl;
 
+  // Constructor for the ImageItem class
   ImageItem({
     required this.id,
     required this.pageUrl,
@@ -53,6 +60,7 @@ class ImageItem {
     required this.userImageUrl,
   });
 
+  // Factory constructor to create an ImageItem from a JSON map
   factory ImageItem.fromJson(Map<String, dynamic> json) => ImageItem(
         id: json["id"],
         pageUrl: json["pageURL"],
@@ -78,6 +86,7 @@ class ImageItem {
         userImageUrl: json["userImageURL"],
       );
 
+  // Method to convert an ImageItem object to a JSON map
   Map<String, dynamic> toJson() => {
         "id": id,
         "pageURL": pageUrl,
