@@ -98,59 +98,69 @@ class _GalleryPageState extends State<GalleryPage> {
           ),
         ),
       ),
-      // Grid view of images
-      body: GridView.builder(
-        controller: _scrollController,
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: MediaQuery.of(context).size.width ~/ 200,
-        ),
-        itemCount: images.length,
-        itemBuilder: (context, index) {
-          final imageData = images[index];
-          return GestureDetector(
-            onTap: () => _openImageDetail(imageData),
-            child: Card(
-              semanticContainer: true,
-              clipBehavior: Clip.antiAliasWithSaveLayer,
-              child: Stack(
-                alignment: AlignmentDirectional.center,
-                fit: StackFit.expand,
-                children: [
-                  // Display image with caching using Hero widget for smooth transitions
-                  Hero(
-                      tag: imageData.id,
-                      child: CacheNetworkImageWithManager(
-                        imageKey: imageData.id.toString(),
-                        imageUrl: imageData.previewUrl,
-                      )),
-                  // Overlay with likes and views information
-                  Positioned(
-                    bottom: 0,
-                    child: Container(
-                      margin: const EdgeInsets.only(bottom: 8),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 8),
-                      decoration: const BoxDecoration(
-                          color: Colors.white70,
-                          borderRadius: BorderRadius.all(Radius.circular(8))),
-                      child: Wrap(
-                        crossAxisAlignment: WrapCrossAlignment.center,
-                        children: [
-                          const Icon(Icons.favorite_sharp, color: Colors.red),
-                          Text(' ${imageData.likes}'),
-                          const SizedBox(width: 4),
-                          const Icon(Icons.remove_red_eye, color: Colors.blue),
-                          Text(' ${imageData.views}'),
-                        ],
-                      ),
+      // Grid view of images && show msg for no image data found
+      body: images.isEmpty
+          ? const Center(
+              child: Text(
+                'No images found',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+            )
+          : GridView.builder(
+              controller: _scrollController,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: MediaQuery.of(context).size.width ~/ 200,
+              ),
+              itemCount: images.length,
+              itemBuilder: (context, index) {
+                final imageData = images[index];
+                return GestureDetector(
+                  onTap: () => _openImageDetail(imageData),
+                  child: Card(
+                    semanticContainer: true,
+                    clipBehavior: Clip.antiAliasWithSaveLayer,
+                    child: Stack(
+                      alignment: AlignmentDirectional.center,
+                      fit: StackFit.expand,
+                      children: [
+                        // Display image with caching using Hero widget for smooth transitions
+                        Hero(
+                            tag: imageData.id,
+                            child: CacheNetworkImageWithManager(
+                              imageKey: imageData.id.toString(),
+                              imageUrl: imageData.previewUrl,
+                            )),
+                        // Overlay with likes and views information
+                        Positioned(
+                          bottom: 0,
+                          child: Container(
+                            margin: const EdgeInsets.only(bottom: 8),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 8),
+                            decoration: const BoxDecoration(
+                                color: Colors.white70,
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(8))),
+                            child: Wrap(
+                              crossAxisAlignment: WrapCrossAlignment.center,
+                              children: [
+                                const Icon(Icons.favorite_sharp,
+                                    color: Colors.red),
+                                Text(' ${imageData.likes}'),
+                                const SizedBox(width: 4),
+                                const Icon(Icons.remove_red_eye,
+                                    color: Colors.blue),
+                                Text(' ${imageData.views}'),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ],
-              ),
+                );
+              },
             ),
-          );
-        },
-      ),
     );
   }
 
