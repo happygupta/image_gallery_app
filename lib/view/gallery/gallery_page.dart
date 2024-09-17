@@ -1,5 +1,7 @@
 // This file contains the GalleryPage widget, which is the main screen of the image gallery app.
 
+// Import necessary packages and files
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:image_gallery_app/api/pixabay_service.dart';
@@ -8,7 +10,7 @@ import 'package:image_gallery_app/utils/constants/constants.dart';
 import 'package:image_gallery_app/utils/widgets/common_widgets.dart';
 import 'package:image_gallery_app/view/gallery/full_screen_image.dart';
 
-// GalleryPage is a StatefulWidget that displays a grid of images fetched from the Pixabay API.
+// Define GalleryPage as a StatefulWidget
 class GalleryPage extends StatefulWidget {
   const GalleryPage({super.key});
 
@@ -16,21 +18,26 @@ class GalleryPage extends StatefulWidget {
   State<GalleryPage> createState() => _GalleryPageState();
 }
 
-// _GalleryPageState manages the state of the GalleryPage.
+// Define _GalleryPageState to manage the state of GalleryPage
 class _GalleryPageState extends State<GalleryPage> {
+  // Initialize variables for API service, image list, pagination, loading state, and search
   final PixabayService pixabayService = PixabayService();
   List<ImageItem> images = [];
   int currentPage = 1;
   bool isLoading = false;
   String searchQuery = '';
 
+  // Timer for debouncing search input
+  Timer? _debounce;
+
+  // ScrollController for implementing infinite scrolling
   final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
+    // Fetch initial images and set up scroll listener for infinite scrolling
     _fetchImages();
-    // Set up scroll listener for infinite scrolling
     _scrollController.addListener(() {
       if (_scrollController.position.pixels ==
               _scrollController.position.maxScrollExtent &&
@@ -40,7 +47,7 @@ class _GalleryPageState extends State<GalleryPage> {
     });
   }
 
-  // Fetches images from the Pixabay API
+  // Method to fetch images from the Pixabay API
   void _fetchImages() async {
     setState(() {
       isLoading = true;
@@ -54,27 +61,38 @@ class _GalleryPageState extends State<GalleryPage> {
     });
   }
 
+  // Method to handle search input changes
+  void onSearchValueChange(value) {
+    setState(() {
+      searchQuery = value;
+    });
+    // Implement debounce to avoid excessive API calls
+    if (_debounce?.isActive ?? false) _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 800), () {
+      setState(() {
+        currentPage = 1;
+        images.clear();
+        _fetchImages();
+      });
+    });
+  }
+
   @override
   void dispose() {
     // Clean up resources when the widget is disposed
     DefaultCacheManager().removeFile(cacheKey);
+    _scrollController.dispose();
+    _debounce?.cancel();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // AppBar with search functionality
       appBar: AppBar(
-        // Search bar in the app bar
         title: TextField(
-          onChanged: (value) {
-            setState(() {
-              searchQuery = value;
-              currentPage = 1;
-              images.clear();
-              _fetchImages();
-            });
-          },
+          onChanged: onSearchValueChange,
           decoration: const InputDecoration(
             hintText: 'Search images...',
           ),
@@ -98,7 +116,7 @@ class _GalleryPageState extends State<GalleryPage> {
                 alignment: AlignmentDirectional.center,
                 fit: StackFit.expand,
                 children: [
-                  // Displays the image with caching
+                  // Display image with caching using Hero widget for smooth transitions
                   Hero(
                       tag: imageData.id,
                       child: CacheNetworkImageWithManager(
@@ -118,18 +136,10 @@ class _GalleryPageState extends State<GalleryPage> {
                       child: Wrap(
                         crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
-                          const Icon(
-                            Icons.favorite_sharp,
-                            color: Colors.red,
-                          ),
+                          const Icon(Icons.favorite_sharp, color: Colors.red),
                           Text(' ${imageData.likes}'),
-                          const SizedBox(
-                            width: 4,
-                          ),
-                          const Icon(
-                            Icons.remove_red_eye,
-                            color: Colors.blue,
-                          ),
+                          const SizedBox(width: 4),
+                          const Icon(Icons.remove_red_eye, color: Colors.blue),
                           Text(' ${imageData.views}'),
                         ],
                       ),
@@ -144,7 +154,7 @@ class _GalleryPageState extends State<GalleryPage> {
     );
   }
 
-  // Opens the full screen view of the selected image
+  // Method to open full screen view of the selected image
   void _openImageDetail(ImageItem imageItem) {
     Navigator.push(
         context,
